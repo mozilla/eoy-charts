@@ -2,6 +2,7 @@
 <html>
 <head>
   <title>Chart Embeds</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF8">
   <style type="text/css">
     body {
       font-family: 'Open Sans';
@@ -18,10 +19,17 @@
 
       .chart header {
         font-size: 18px;
+        margin-bottom: 1em;
       }
 
     #chart-country-data {
       border-bottom: 1px solid #D1D2D4;
+    }
+
+    .chart-graphic text {
+      fill: white;
+      font: 10px sans-serif;
+      text-anchor: end;
     }
   </style>
 </head>
@@ -34,14 +42,16 @@
 
     <section id="chart-country-data" class="chart">
       <header>Country Data Title</header>
-
+      <svg class="chart-graphic" id="chart-graphic-country"></svg>
     </section>
 
     <section id="chart-source-data" class="chart">
       <header>Source Data Title</header>
-
+      <svg class="chart-graphic" id="chart-graphic-source"></svg>
     </section>
   </div>
 
+  <script src="bower_components/d3/d3.js"></script>
+  <script src="charts.js"></script>
 </body>
 </html>
