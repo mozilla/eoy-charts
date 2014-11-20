@@ -1,26 +1,33 @@
 var CHARTS = {
   init: function () {
-    var dummySourceData = [
-      {
-        source: 'Twitter',
-        count: Math.floor(Math.random() * 1000000)
-      },
-      {
-        source: 'Facebook',
-        count: Math.floor(Math.random() * 1000000)
-      },
-      {
-        source: 'Homepage',
-        count: Math.floor(Math.random() * 1000000)
-      },
-      {
-        source: 'Snippet',
-        count: Math.floor(Math.random() * 1000000)
-      }
-    ];
+    this.fetchData('http://transformtogeckoboard.herokuapp.com/eoy/donationsbysource', function (data) {
+      this.renderSourceData(data);
+    });
 
-    this.renderSourceData(dummySourceData);
-    this.renderCountryData(dummySourceData);
+    this.fetchData('http://transformtogeckoboard.herokuapp.com/eoy/donationsbycountry', function (data) {
+      this.renderCountryData(data);
+    });
+  },
+  fetchData: function (url, callback) {
+    var request = new XMLHttpRequest();
+    var self = this;
+
+    request.open('GET', url, true);
+
+    request.onload = function() {
+      if (this.status >= 200 && this.status < 400){
+        var data = JSON.parse(this.response);
+        callback.call(self, data);
+      } else {
+        console.error('Data request failed');
+      }
+    };
+
+    request.onerror = function() {
+      console.error('Data request failed');
+    };
+
+    request.send();
   },
   renderSourceData: function (data) {
     var width = 340,
@@ -29,7 +36,7 @@ var CHARTS = {
     var colorScale = d3.scale.category20b();
 
     var x = d3.scale.linear()
-      .domain([0, d3.max(data.map(function (item) {return item.count}))])
+      .domain([0, d3.max(data.map(function (item) {return item.eoyDonations}))])
       .range([0, width]);
 
     var chart = d3.select('#chart-graphic-source')
@@ -43,15 +50,15 @@ var CHARTS = {
       .attr('transform', function(d, i) { return 'translate(0,' + i * barHeight + ')'; });
 
     bar.append('rect')
-      .attr('width', function(d) { return x(d.count) })
+      .attr('width', function(d) { return x(parseFloat(d.eoyDonations), 10) })
       .attr('height', barHeight - 2)
       .attr('fill', function(d, i) { return colorScale(i) });
 
     bar.append('text')
-      .attr('x', function(d) { return x(d.count) - 10})
+      .attr('x', function(d) { return x(d.eoyDonations) - 10})
       .attr('y', barHeight / 2)
       .attr('dy', '.35em')
-      .text(function(d) { return d.source; });
+      .text(function(d) { return d.country; });
   },
   renderCountryData: function (data) {
     var width = 340,
@@ -70,7 +77,7 @@ var CHARTS = {
       .outerRadius(radius);
 
     var pie = d3.layout.pie()
-      .value(function(d) { return d.count; });
+      .value(function(d) { return parseFloat(d.eoyDonations, 10); });
 
     var arcs = chart.selectAll('g.slice')
       .data(pie)
@@ -89,7 +96,7 @@ var CHARTS = {
         return 'translate(' + arc.centroid(d) + ')';
       })
       .attr('text-anchor', 'middle')
-      .text(function(d, i) { return data[i].source; });
+      .text(function(d, i) { return data[i].country; });
   }
 };
 
