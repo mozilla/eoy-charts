@@ -9,14 +9,14 @@
     }
 
     #container {
-      width: 380px;
+      width: 340px;
       margin: 50px auto;
+      padding: 0 20px;
     }
 
     .chart {
-      padding: 20px;
+      padding: 20px 0;
     }
-
       .chart header {
         font-size: 18px;
         margin-bottom: 1em;
@@ -28,9 +28,27 @@
 
     .chart-graphic text {
       fill: white;
-      font: 10px sans-serif;
+      font-family: "Open Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+      font-size: 12px;
       text-anchor: end;
     }
+
+    .pie-chart-key {
+      display: flex;
+      flex-wrap: wrap;
+    }
+      .pie-chart-key p {
+        font-size: 16px;
+        flex-basis: 50%;
+        margin: 0.5em 0;
+      }
+      .pie-chart-key p:nth-child(2n) {
+        text-align: right;
+      }
+      .pie-chart-key span {
+        font-size: 0.66em;
+        font-weight: 700;
+      }
   </style>
 </head>
 <body>
@@ -42,16 +60,17 @@
 
     <section id="chart-country-data" class="chart">
       <header>Country Data Title</header>
-      <svg class="chart-graphic" id="chart-graphic-country"></svg>
+      <svg class="chart-graphic"></svg>
     </section>
 
     <section id="chart-source-data" class="chart">
       <header>Source Data Title</header>
-      <svg class="chart-graphic" id="chart-graphic-source"></svg>
+      <svg class="chart-graphic"></svg>
     </section>
   </div>
 
   <script src="bower_components/d3/d3.js"></script>
   <script src="charts.js"></script>
+
 </body>
 </html>
