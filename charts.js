@@ -27,7 +27,9 @@ var CHARTS = {
 
     return x1 + x2;
   },
-  init: function (target) {
+  init: function (target, makeDataFake) {
+    makeDataFake = makeDataFake || false;
+
     document.querySelector(target).innerHTML = '<header>' +
       '<h1>EOY 2014</h1>' +
     '</header>' +
@@ -43,31 +45,35 @@ var CHARTS = {
     '</section>';
 
     this.fetchData('http://transformtogeckoboard.herokuapp.com/eoy/donationsbycountry', function (data) {
-      this.renderPieChart('#chart-country-data', this.modelData(data));
+      this.renderPieChart('#chart-country-data', this.modelData(data, makeDataFake));
     });
 
     this.fetchData('http://transformtogeckoboard.herokuapp.com/eoy/donationsbysource', function (data) {
-      this.renderBarChart('#chart-source-data', this.modelData(data));
+      this.renderBarChart('#chart-source-data', this.modelData(data, makeDataFake));
     });
   },
-  modelData: function (data) {
+  modelData: function (data, makeDataFake) {
     var modeledData = [];
 
     data.forEach(function (item, index, array) {
       modeledData.push({
         country: item.country,
-        eoyDonations: Math.round(Math.random() * 1000000) // TEMP : Waiting for realistic values from API
+        eoyDonations: makeDataFake ? Math.round(Math.random() * 1000000) : item.eoyDonations
       });
     });
 
+    // Sort data by donation amount (highest to lowest)
     modeledData = modeledData.sort(function (a, b) {
       return b.eoyDonations - a.eoyDonations;
     });
 
+    // Only display first 8
     modeledData = modeledData.slice(0,8);
 
-    // TEMP : Simulating a large top source
-    modeledData[0].eoyDonations = Math.round(modeledData[0].eoyDonations * (Math.random() * 3 + 1));
+    // Simulating a large top source (for fake data only)
+    if (makeDataFake) {
+      modeledData[0].eoyDonations = Math.round(modeledData[0].eoyDonations * (Math.random() * 3 + 1));
+    }
 
     return modeledData;
   },
@@ -157,7 +163,7 @@ var CHARTS = {
     var keyHTML = '<div class="pie-chart-key">';
 
     data.forEach(function (item, index, array) {
-      keyHTML += '<p><b style="color:' + self.colors[index] + '">&#9724;</b> ' + item.country + '<br/><span>$' + self.addCommas(item.eoyDonations) + '</span></p>';
+      keyHTML += '<p><b style="color:' + self.colors[index] + '">&#9724;</b> ' + item.country + '<br/><span>$' + self.addCommas(Math.round(item.eoyDonations)) + '</span></p>';
     });
 
     elTarget.innerHTML = elTarget.innerHTML + keyHTML + '</div>';
