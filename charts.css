@@ -10,13 +10,6 @@
   border-bottom: 1px solid #D1D2D4;
 }
 
-.chart-graphic text {
-  fill: white;
-  font-family: "Open Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
-  font-size: 12px;
-  text-anchor: end;
-}
-
 .pie-chart-key {
   display: flex;
   flex-wrap: wrap;
@@ -32,4 +25,22 @@
   .pie-chart-key span {
     font-size: 0.66em;
     font-weight: 700;
+    color: #444;
   }
+
+.bar-chart {
+  font-size: 15px;
+  font-weight: 600;
+}
+  .bar-chart .bar {
+
+  }
+  .bar-chart .bar-meta {
+    margin: 0.5em 0 0.75em 0;
+  }
+    .bar-chart .bar-meta span {
+      margin-left: 1em;
+      font-size: 0.66em;
+      font-weight: 700;
+      color: #444;
+    }
