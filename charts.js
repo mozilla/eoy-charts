@@ -30,19 +30,17 @@ var CHARTS = {
   init: function (target, makeDataFake) {
     makeDataFake = makeDataFake || false;
 
-    document.querySelector(target).innerHTML = '<header>' +
-      '<h1>EOY 2014</h1>' +
-    '</header>' +
+    // Inject basic HTML
+    document.querySelector(target).innerHTML =
+      '<section id="chart-country-data" class="chart">' +
+        '<header>Donations by Country</header>' +
+        '<svg class="chart-graphic"></svg>' +
+      '</section>' +
 
-    '<section id="chart-country-data" class="chart">' +
-      '<header>Donations by Country</header>' +
-      '<svg class="chart-graphic"></svg>' +
-    '</section>' +
-
-    '<section id="chart-source-data" class="chart">' +
-      '<header>Donations by Source</header>' +
-      '<svg class="chart-graphic"></svg>' +
-    '</section>';
+      '<section id="chart-source-data" class="chart">' +
+        '<header>Donations by Source</header>' +
+        '<svg class="chart-graphic"></svg>' +
+      '</section>';
 
     this.fetchData('http://transformtogeckoboard.herokuapp.com/eoy/donationsbycountry', function (data) {
       this.renderPieChart('#chart-country-data', this.modelData(data, makeDataFake));
