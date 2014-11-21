@@ -24,7 +24,10 @@
   <script src="charts.js"></script>
 
   <script>
-    CHARTS.init('#container', true);
+    CHARTS.init('#container', {
+        donorsByCountry: 'Donors by Country',
+        donorsBySource: 'Donors by Source'
+      }, true);
   </script>
 
 </body>

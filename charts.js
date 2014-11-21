@@ -27,18 +27,18 @@ var CHARTS = {
 
     return x1 + x2;
   },
-  init: function (target, makeDataFake) {
+  init: function (target, localizedStrings, makeDataFake) {
     makeDataFake = makeDataFake || false;
 
     // Inject basic HTML
     document.querySelector(target).innerHTML =
       '<section id="chart-country-data" class="chart">' +
-        '<header>Donations by Country</header>' +
+        '<header>' + localizedStrings.donorsByCountry + '</header>' +
         '<svg class="chart-graphic"></svg>' +
       '</section>' +
 
       '<section id="chart-source-data" class="chart">' +
-        '<header>Donations by Source</header>' +
+        '<header>' + localizedStrings.donorsBySource + '</header>' +
         '<svg class="chart-graphic"></svg>' +
       '</section>';
 
