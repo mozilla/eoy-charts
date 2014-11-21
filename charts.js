@@ -27,7 +27,21 @@ var CHARTS = {
 
     return x1 + x2;
   },
-  init: function () {
+  init: function (target) {
+    document.querySelector(target).innerHTML = '<header>' +
+      '<h1>EOY 2014</h1>' +
+    '</header>' +
+
+    '<section id="chart-country-data" class="chart">' +
+      '<header>Donations by Country</header>' +
+      '<svg class="chart-graphic"></svg>' +
+    '</section>' +
+
+    '<section id="chart-source-data" class="chart">' +
+      '<header>Donations by Source</header>' +
+      '<svg class="chart-graphic"></svg>' +
+    '</section>';
+
     this.fetchData('http://transformtogeckoboard.herokuapp.com/eoy/donationsbycountry', function (data) {
       this.renderPieChart('#chart-country-data', this.modelData(data));
     });
@@ -51,6 +65,8 @@ var CHARTS = {
     });
 
     modeledData = modeledData.slice(0,8);
+
+    // TEMP : Simulating a large top source
     modeledData[0].eoyDonations = Math.round(modeledData[0].eoyDonations * (Math.random() * 3 + 1));
 
     return modeledData;
@@ -147,5 +163,3 @@ var CHARTS = {
     elTarget.innerHTML = elTarget.innerHTML + keyHTML + '</div>';
   }
 };
-
-CHARTS.init();
