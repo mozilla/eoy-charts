@@ -42,25 +42,25 @@ var CHARTS = {
         '<div class="bar-chart"></div>' +
       '</section>';
 
-    this.fetchData('http://transformtogeckoboard.herokuapp.com/eoy/donationsbycountry', function (data) {
-      this.renderPieChart('#chart-country-data', this.modelData(data, makeDataFake));
+    this.fetchData('http://transformtogeckoboard.herokuapp.com/eoy/transactionsbycountry', function (data) {
+      this.renderPieChart('#chart-country-data', this.modelData(data, 'country', makeDataFake));
     });
 
-    this.fetchData('http://transformtogeckoboard.herokuapp.com/eoy/donationsbysource', function (data) {
-      this.renderBarChart('#chart-source-data', this.modelData(data, makeDataFake));
+    this.fetchData('http://transformtogeckoboard.herokuapp.com/eoy/transactionsbysource', function (data) {
+      this.renderBarChart('#chart-source-data', this.modelData(data, 'source', makeDataFake));
     });
   },
-  modelData: function (data, makeDataFake) {
+  modelData: function (data, sourceKey, makeDataFake) {
     var modeledData = [];
 
     data.forEach(function (item, index, array) {
       modeledData.push({
-        country: item.country,
+        donationSource: item[sourceKey],
         eoyDonations: makeDataFake ? Math.round(Math.random() * 1000000) : item.eoyDonations
       });
     });
 
-    // Sort data by donation amount (highest to lowest)
+    // Sort data by number of donors (highest to lowest)
     modeledData = modeledData.sort(function (a, b) {
       return b.eoyDonations - a.eoyDonations;
     });
@@ -104,23 +104,21 @@ var CHARTS = {
       largestValue = data[0].eoyDonations;
 
     data.forEach(function (item, index, array) {
-      chartHTML += '<div class="bar" style="width:' + ((item.eoyDonations / largestValue).toString()).substring(2,4) + '%; background-color: ' + self.colors[index] + '; height:' + barHeight + 'px"></div>';
-      chartHTML += '<p class="bar-meta">' + item.country + ' <span>$' + self.addCommas(item.eoyDonations) + '</span></p>';
+      chartHTML += '<div class="bar" style="width:' + ((item.eoyDonations / largestValue)*100).toString() + '%; background-color: ' + self.colors[index] + '; height:' + barHeight + 'px"></div>';
+      chartHTML += '<p class="bar-meta">' + item.donationSource + ' <span>' + self.addCommas(item.eoyDonations) + '</span></p>';
     });
 
     document.querySelector(target + ' .bar-chart').innerHTML = chartHTML;
   },
   renderPieChart: function (target, data) {
-    var width = 340,
-      height = 340,
+    var viewbox = '0 0 340 340',
       radius = 170,
       elTarget = document.querySelector(target),
       self = this;
 
     var chart = d3.select(target + ' svg')
       .data([data])
-      .attr('width', width)
-      .attr('height', height)
+      .attr('viewbox', viewbox)
       .append('svg:g')
       .attr('transform', 'translate(' + radius + ',' + radius + ')');
 
@@ -145,7 +143,7 @@ var CHARTS = {
     var keyHTML = '<div class="pie-chart-key">';
 
     data.forEach(function (item, index, array) {
-      keyHTML += '<p><b style="color:' + self.colors[index] + '">&#9724;</b> ' + item.country + '<br/><span>$' + self.addCommas(Math.round(item.eoyDonations)) + '</span></p>';
+      keyHTML += '<p><b style="color:' + self.colors[index] + '">&#9724;</b> ' + item.donationSource + '<br/><span>' + self.addCommas(Math.round(item.eoyDonations)) + '</span></p>';
     });
 
     elTarget.innerHTML = elTarget.innerHTML + keyHTML + '</div>';
