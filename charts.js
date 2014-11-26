@@ -1,4 +1,7 @@
 var CHARTS = {
+  config: {
+    topDonorGroupSize: 8
+  },
   colors: [
     '#2F5899',
     '#1D6FB7',
@@ -28,6 +31,8 @@ var CHARTS = {
     return x1 + x2;
   },
   init: function (target, localizedStrings, makeDataFake) {
+    var self = this;
+
     makeDataFake = makeDataFake || false;
 
     // Inject basic HTML
@@ -43,30 +48,39 @@ var CHARTS = {
       '</section>';
 
     this.fetchData('http://transformtogeckoboard.herokuapp.com/eoy/transactionsbycountry', function (data) {
-      this.renderPieChart('#chart-country-data', this.modelData(data, 'country', makeDataFake));
+      data = this.modelData(data, 'country', makeDataFake);
+      this.renderPieChart('#chart-country-data', data);
+
+      if (data.length > self.config.topDonorGroupSize) {
+        this.renderShowHide(document.querySelector('#chart-country-data [data-component="toggle"]'));
+      }
     });
 
     this.fetchData('http://transformtogeckoboard.herokuapp.com/eoy/transactionsbysource', function (data) {
-      this.renderBarChart('#chart-source-data', this.modelData(data, 'source', makeDataFake));
+      data = this.modelData(data, 'source', makeDataFake);
+      this.renderBarChart('#chart-source-data', data);
+
+      if (data.length > self.config.topDonorGroupSize) {
+        this.renderShowHide(document.querySelector('#chart-source-data [data-component="toggle"]'));
+      }
     });
   },
   modelData: function (data, sourceKey, makeDataFake) {
     var modeledData = [];
 
     data.forEach(function (item, index, array) {
-      modeledData.push({
-        donationSource: item[sourceKey],
-        eoyDonations: makeDataFake ? Math.round(Math.random() * 1000000) : item.eoyDonations
-      });
+      if (parseInt(item.eoyDonations, 10) !== 0 || makeDataFake) {
+        modeledData.push({
+          donationSource: item[sourceKey],
+          eoyDonations: makeDataFake ? Math.round(Math.random() * 1000000) : item.eoyDonations
+        });
+      }
     });
 
     // Sort data by number of donors (highest to lowest)
     modeledData = modeledData.sort(function (a, b) {
       return b.eoyDonations - a.eoyDonations;
     });
-
-    // Only display first 8
-    modeledData = modeledData.slice(0,8);
 
     // Simulating a large top source (for fake data only)
     if (makeDataFake) {
@@ -100,13 +114,39 @@ var CHARTS = {
     var self = this,
       width = 340,
       barHeight = 27,
-      chartHTML = ''
+      chartHTML = '',
       largestValue = data[0].eoyDonations;
 
-    data.forEach(function (item, index, array) {
-      chartHTML += '<div class="bar" style="width:' + ((item.eoyDonations / largestValue)*100).toString() + '%; background-color: ' + self.colors[index] + '; height:' + barHeight + 'px"></div>';
-      chartHTML += '<p class="bar-meta">' + item.donationSource + ' <span>' + self.addCommas(item.eoyDonations) + '</span></p>';
+    function buildKeyItem(item, index) {
+      var fragment = '';
+
+      if (item.eoyDonations !== '0') {
+        fragment += '<div class="bar" style="width:' + ((item.eoyDonations / largestValue)*100).toString() + '%; background-color: ' + self.colors[index % 12] + '; height:' + barHeight + 'px"></div>';
+        fragment += '<p class="bar-meta">' + item.donationSource + ' <span>' + self.addCommas(item.eoyDonations) + '</span></p>';
+      }
+
+      return fragment;
+    }
+
+    // Construct Key ----------------------------------------------------------
+
+    // Construct top donors section
+    chartHTML += '<div>';
+
+    data.slice(0, self.config.topDonorGroupSize).forEach(function (item, index, array) {
+      chartHTML += buildKeyItem(item, index);
     });
+
+    chartHTML += '</div>';
+
+    // Construct bottom donors section
+    chartHTML += '<div data-component="toggle">';
+
+    data.slice(self.config.topDonorGroupSize).forEach(function (item, index, array) {
+      chartHTML += buildKeyItem(item, index);
+    });
+
+    chartHTML += '</div>';
 
     document.querySelector(target + ' .bar-chart').innerHTML = chartHTML;
   },
@@ -117,7 +157,7 @@ var CHARTS = {
       self = this;
 
     var chart = d3.select(target + ' svg')
-      .data([data])
+      .data([data.slice(0, self.config.topDonorGroupSize)])
       .attr('viewbox', viewbox)
       .append('svg:g')
       .attr('transform', 'translate(' + radius + ',' + radius + ')');
@@ -134,18 +174,70 @@ var CHARTS = {
       .append('svg:g')
       .attr('class', 'slice');
 
+    function buildKeyItem(item, index, isOnChart) {
+      var fragment = '';
+
+      // Don't build keys for non-donors
+      if (item.eoyDonations !== '0') {
+        fragment += '<p>';
+
+        if (isOnChart) {
+          fragment += '<b style="color:' + self.colors[index] + '">&#9724;</b> ';
+        }
+
+        fragment += (item.donationSource + '<br/><span>' + self.addCommas(Math.round(item.eoyDonations)) + '</span></p>');
+      }
+
+      return fragment;
+    }
+
     arcs.append('svg:path')
       .attr('fill', function(d, i) { return self.colors[i]; } )
       .attr('d', arc);
 
-    // Construct Key
+    // Construct Key ----------------------------------------------------------
 
-    var keyHTML = '<div class="pie-chart-key">';
+    // Construct top donors section
+    var keyHTML = '<div class="pie-chart-key"><div class="group">';
 
-    data.forEach(function (item, index, array) {
-      keyHTML += '<p><b style="color:' + self.colors[index] + '">&#9724;</b> ' + item.donationSource + '<br/><span>' + self.addCommas(Math.round(item.eoyDonations)) + '</span></p>';
+    data.slice(0, self.config.topDonorGroupSize).forEach(function (item, index, array) {
+      keyHTML += buildKeyItem(item, index, true);
     });
 
-    elTarget.innerHTML = elTarget.innerHTML + keyHTML + '</div>';
+    keyHTML += '</div>';
+
+    // Construct bottom donors section
+    keyHTML += '<div class="group" data-component="toggle">';
+
+    data.slice(self.config.topDonorGroupSize).forEach(function (item, index, array) {
+      keyHTML += buildKeyItem(item, index, false);
+    });
+
+    keyHTML += '</div></div>';
+
+    elTarget.innerHTML = elTarget.innerHTML + keyHTML;
+  },
+  renderShowHide: function (target) {
+    var isVisible = false,
+      elToggle = document.createElement('button'),
+      nativeDisplay = target.style.display;
+
+    elToggle.innerHTML = '+';
+    elToggle.classList.add('btn-toggle');
+
+    target.parentNode.insertBefore(elToggle , target);
+    target.style.display = 'none';
+
+    elToggle.addEventListener('click', function () {
+      if (isVisible) {
+        target.style.display = 'none';
+        elToggle.innerHTML = '+';
+      } else {
+        target.style.display = nativeDisplay;
+        elToggle.innerHTML = '-';
+      }
+
+      isVisible = !isVisible;
+    });
   }
 };
