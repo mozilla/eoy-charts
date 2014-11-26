@@ -2,20 +2,7 @@ var CHARTS = {
   config: {
     topDonorGroupSize: 8
   },
-  colors: [
-    '#2F5899',
-    '#1D6FB7',
-    '#19B7E4',
-    '#61C3B0',
-    '#89C764',
-    '#FCDD3F',
-    '#FAAC3F',
-    '#F48032',
-    '#EB5543',
-    '#F06DA6',
-    '#A5509C',
-    '#7C3B79'
-  ],
+  colors: ['#2F5899', '#A5509C', '#19B7E4', '#FAAC3F' , '#61C3B0', '#FCDD3F', '#F48032', '#7C3B79', '#EB5543', '#89C764', '#1D6FB7', '#F06DA6'],
   addCommas: function (target) {
     target += '';
 
